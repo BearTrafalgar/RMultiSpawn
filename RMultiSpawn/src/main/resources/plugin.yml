@@ -1,0 +1,21 @@
+main: com.doa.RMultiSpawn.Main
+name: RMultiSpawn
+version: 1.0.0
+api-version: '1.20'
+author: Bear "UniBear" Trafalgar
+commands:
+   setspawn:
+      description: Sets a new spawn point
+      permission: RMultiSpawn.setspawn
+      usage: /<command> [Spawn Name]
+   delspawn:
+      description: Deletes a spawn point
+      permission: RMultiSpawn.delspawn
+      usage: /<command> [Spawn Name]
+   spawn:
+      description: Teleports player to a spawn point
+      permission: RMultiSpawn.spawn
+      usage: /<command> (Spawn Name)
+
+
+
