@@ -3,6 +3,7 @@ name: RMultiSpawn
 version: 1.0.0
 api-version: '1.20'
 author: Bear "UniBear" Trafalgar
+depend: [Vault]
 commands:
    setspawn:
       description: Sets a new spawn point
@@ -16,6 +17,20 @@ commands:
       description: Teleports player to a spawn point
       permission: RMultiSpawn.spawn
       usage: /<command> (Spawn Name)
+permissions:
+   RMultiSpawn.setspawn:
+      description: Allows you to set a spawn.
+      default: op
+   RMultiSpawn.delspawn:
+      description: Allows you to delete a spawn.
+      default: op
+   RMultiSpawn.spawn:
+      description: Allows you to teleport to a random spawn. You may specify a specific spawn to go to aswell.
+      default: true
+   RMultiSpawn.bypass:
+      description: Allows bypass of teleport delay and allows you to specify a specfic spawn to go to.
+      default: op
+   
 
 
 

@@ -23,7 +23,7 @@ public class OnJoin implements Listener {
         // Check if the player is joining for the first time
         if (!player.hasPlayedBefore()) {
             // If it's the first time, spawn the player
-            main.SpawnControl(player);
+            main.spawnPlayer(player);
         }
     }
 }

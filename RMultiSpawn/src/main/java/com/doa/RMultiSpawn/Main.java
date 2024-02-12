@@ -7,15 +7,21 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import net.milkbowl.vault.permission.Permission;
 
 public class Main extends JavaPlugin {
     Main plugin = this;
+    public Permission perms = null;
 
     @Override
     public void onEnable() {
         // Save default configuration file if it doesn't exist
         plugin.saveDefaultConfig();
+        setupPermissions();
         
         // Registering commands and event listener
         this.getCommand("spawn").setExecutor(new Commands(this));
@@ -25,7 +31,7 @@ public class Main extends JavaPlugin {
     }
     
     // Method to handle player spawning
-    public void SpawnControl(Player player) {
+    public void spawnPlayer(Player player) {
         Location teleport;
         Random rand = new Random();
         
@@ -49,4 +55,11 @@ public class Main extends JavaPlugin {
         // Clear the list of paths
         configPaths.clear();
     }
+    
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+        return perms != null;
+    }
+    
 }

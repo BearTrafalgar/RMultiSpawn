@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 
 public class Commands implements CommandExecutor {
     // Reference to the main class
@@ -16,8 +18,8 @@ public class Commands implements CommandExecutor {
     public Commands(Main main) {
         this.main = main;
     }
+    
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         Main myPlugin = main;
@@ -32,10 +34,26 @@ public class Commands implements CommandExecutor {
             return false;
         }
 
-        // Handle /spawn command
+        
         if (cmd.getName().equalsIgnoreCase("spawn")) {
-            myPlugin.SpawnControl(player);
-            return true;
+        	//handle /spawn (spawn) command
+        	if (!main.getConfig().get(args[0]).equals(null) && main.perms.has(player, "RMultiSpawn.bypass")) {
+        		player.teleport((Location) main.getConfig().get(args[0]));
+        		return true;
+        	}
+        	//handle /spawn for a player having bypass or not
+        	if (!main.perms.has(player, "RMultiSpawn.bypass")) {
+                new BukkitRunnable() {
+            		@Override
+            		public void run() {
+            			main.spawnPlayer(player);
+            		}
+                }.runTaskLaterAsynchronously(myPlugin, 20L * 3L);
+                return true;
+        	} else {
+        		main.spawnPlayer(player);
+        		return true;
+        	}
         }
 
         // Handle /setspawn command
@@ -56,8 +74,8 @@ public class Commands implements CommandExecutor {
         // Handle /delspawn command
         if (cmd.getName().equalsIgnoreCase("delspawn")) {
             // Check if spawn name is provided
-            if (args.length < 1) {
-                sender.sendMessage("You must specify the name of the spawn to delete");
+            if (main.getConfig().get(args[0]).equals(null)) {
+                sender.sendMessage("You must specify a valid name of a spawn to delete it");
                 return false;
             }
             String spawnName = args[0];
@@ -69,7 +87,7 @@ public class Commands implements CommandExecutor {
                 return true;
             } else {
                 sender.sendMessage("This is not a correct spawn name, please check your command and try again!");
-                return false;
+                return false; 
             }
         }
 
