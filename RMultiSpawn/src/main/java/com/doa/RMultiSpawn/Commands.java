@@ -1,6 +1,5 @@
 package com.doa.RMultiSpawn;
 
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -8,7 +7,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 
 public class Commands implements CommandExecutor {
     // Reference to the main class
@@ -18,79 +16,86 @@ public class Commands implements CommandExecutor {
     public Commands(Main main) {
         this.main = main;
     }
-    
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        Main myPlugin = main;
-
-        // Get player and player location
-        Player player = (Player) sender;
-        Location loc = player.getLocation();
-
         // Check if the sender is a player
         if (!(sender instanceof Player)) {
-            Bukkit.getLogger().info("You must be in-game to execute this command!");
+            sender.sendMessage("You must be in-game to execute this command!");
             return false;
         }
 
-        
+        Player player = (Player) sender;
+
+        // Handle /spawn command
         if (cmd.getName().equalsIgnoreCase("spawn")) {
-        	//handle /spawn (spawn) command
-        	if (!main.getConfig().get(args[0]).equals(null) && main.perms.has(player, "RMultiSpawn.bypass")) {
-        		player.teleport((Location) main.getConfig().get(args[0]));
-        		return true;
-        	}
-        	//handle /spawn for a player having bypass or not
-        	if (!main.perms.has(player, "RMultiSpawn.bypass")) {
-                new BukkitRunnable() {
-            		@Override
-            		public void run() {
-            			main.spawnPlayer(player);
-            		}
-                }.runTaskLaterAsynchronously(myPlugin, 20L * 3L);
-                return true;
-        	} else {
-        		main.spawnPlayer(player);
-        		return true;
-        	}
+            if (args.length < 1) {
+                // Handle /spawn command without arguments
+                if (!main.perms.has(player, "RMultiSpawn.bypass")) {
+                	sender.sendMessage("Teleporting in 3s.");
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            main.spawnPlayer(player);
+                        }
+                    }.runTaskLater(main, 60L);
+                    return true;
+                } else {
+                    main.spawnPlayer(player);
+                    return true;
+                }
+            } else {
+            	if (!main.getConfig().contains(args[0])) {
+            		sender.sendMessage("The specified spawn does not exist.");
+            		return true;
+            	}
+                if (!main.perms.has(player, "RMultiSpawn.bypass")) {
+                    player.sendMessage("You must have the RMultiSpawn.bypass permission to select a specific spawn.");
+                    return true;
+                }
+                
+                String spawnName = args[0];
+                Location spawnLocation = main.getConfig().getLocation(spawnName);
+                if (spawnLocation != null) {
+                    player.teleport(spawnLocation);
+                    return true;
+                } else {
+                    player.sendMessage("Exception occured. Please try again later, if the error persists please reach out to your servers administration.");
+                    return true;
+                }
+            }
         }
 
         // Handle /setspawn command
         if (cmd.getName().equalsIgnoreCase("setspawn")) {
-            // Check if spawn name is provided
             if (args.length < 1) {
                 sender.sendMessage("You must include a spawn name");
                 return false;
             }
             String spawnName = args[0];
-
-            // Save spawn location to configuration
-            myPlugin.getConfig().set(spawnName, loc);
-            myPlugin.saveConfig();
+            main.getConfig().set(spawnName, player.getLocation());
+            main.saveConfig();
             return true;
         }
 
         // Handle /delspawn command
         if (cmd.getName().equalsIgnoreCase("delspawn")) {
-            // Check if spawn name is provided
-            if (main.getConfig().get(args[0]).equals(null)) {
-                sender.sendMessage("You must specify a valid name of a spawn to delete it");
+            if (args.length < 1) {
+                sender.sendMessage("You must specify the name of the spawn to delete.");
                 return false;
             }
             String spawnName = args[0];
-
-            // Check if spawn exists and delete it
-            if (myPlugin.getConfig().contains(spawnName)) {
-                myPlugin.getConfig().set(spawnName, null);
-                myPlugin.saveConfig();
+            if (main.getConfig().contains(spawnName)) {
+                main.getConfig().set(spawnName, null);
+                main.saveConfig();
                 return true;
             } else {
-                sender.sendMessage("This is not a correct spawn name, please check your command and try again!");
-                return false; 
+                sender.sendMessage("The specified spawn does not exist.");
+                return true;
             }
         }
 
         return true;
     }
 }
+
